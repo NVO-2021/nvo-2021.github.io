@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="12345参考资料：spring源码深度解析Spring版本：Spring-4.3.5-RELEASE吐槽下，老外写的东西真晕啊，像亲妈一样啰啰嗦嗦帮你考虑了各种情况，然后最好还不忘加一句：如果你不满意，还可以拓展！！！">
+<meta name="keywords" content="Spring,源码阅读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring 源码阅读">
+<meta property="og:url" content="https://xytyzgf.coding.me/2018/10/19/Spring-源码阅读/index.html">
+<meta property="og:site_name" content="飞盏的一亩三分地">
+<meta property="og:description" content="12345参考资料：spring源码深度解析Spring版本：Spring-4.3.5-RELEASE吐槽下，老外写的东西真晕啊，像亲妈一样啰啰嗦嗦帮你考虑了各种情况，然后最好还不忘加一句：如果你不满意，还可以拓展！！！">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/8595440-40411e98d35d56af.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/8595440-81ae3f036ad5c4e4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/8595440-a40ed52d20a40d46.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/8595440-9f2f892bbce371d9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-10-19T09:20:10.657Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring 源码阅读">
+<meta name="twitter:description" content="12345参考资料：spring源码深度解析Spring版本：Spring-4.3.5-RELEASE吐槽下，老外写的东西真晕啊，像亲妈一样啰啰嗦嗦帮你考虑了各种情况，然后最好还不忘加一句：如果你不满意，还可以拓展！！！">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/8595440-40411e98d35d56af.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Spring 源码阅读 | 飞盏的一亩三分地</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">飞盏的一亩三分地</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-cool-play">
+    <a href="/cool-play" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br />酷玩</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-photos">
+    <a href="/photos" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-photo"></i> <br />照片</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-think">
+    <a href="/think" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-lightbulb-o"></i> <br />思考</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://xytyzgf.coding.me/2018/10/19/Spring-源码阅读/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xytyzgf">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞盏的一亩三分地">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spring 源码阅读
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-10-19 17:00:43 / 修改时间：17:20:10" itemprop="dateCreated datePublished" datetime="2018-10-19T17:00:43+08:00">2018-10-19</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/19/Spring-源码阅读/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/10/19/Spring-源码阅读/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">参考资料：spring源码深度解析</span><br><span class="line">Spring版本：Spring-4.3.5-RELEASE</span><br><span class="line"></span><br><span class="line">吐槽下，老外写的东西真晕啊，像亲妈一样啰啰嗦嗦帮你考虑了各种情况，然后最好还不忘加一句：</span><br><span class="line">如果你不满意，还可以拓展！！！</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h1 id="spring-核心代码"><a href="#spring-核心代码" class="headerlink" title="spring 核心代码"></a>spring 核心代码</h1><h2 id="核心流程初始化过程"><a href="#核心流程初始化过程" class="headerlink" title="核心流程初始化过程"></a>核心流程初始化过程</h2><p>非常清晰的模板方法，每一个步骤封装成一个具体的函数进行代理，职责清晰明了；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void refresh() throws BeansException, IllegalStateException &#123;</span><br><span class="line">   synchronized (this.startupShutdownMonitor) &#123;</span><br><span class="line">      //预热，做准备工作</span><br><span class="line">      prepareRefresh();</span><br><span class="line"> </span><br><span class="line">      // Tell the subclass to refresh the internal bean factory.</span><br><span class="line">      //获取内部的bean factory</span><br><span class="line">      ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();</span><br><span class="line"> </span><br><span class="line">      // Prepare the bean factory for use in this context.</span><br><span class="line">      //预热beanFactory</span><br><span class="line">      prepareBeanFactory(beanFactory);</span><br><span class="line"> </span><br><span class="line">      try &#123;</span><br><span class="line">         // Allows post-processing of the bean factory in context subclasses.</span><br><span class="line">         postProcessBeanFactory(beanFactory);</span><br><span class="line"> </span><br><span class="line">         // Invoke factory processors registered as beans in the context.</span><br><span class="line">         //beanFactory在上下文中注册bean，核心的代码就在这里</span><br><span class="line">         invokeBeanFactoryPostProcessors(beanFactory);</span><br><span class="line"> </span><br><span class="line">         // Register bean processors that intercept bean creation.</span><br><span class="line">         // bean创建的时候拦截并注册bean处理器，这里只创建处理器，真正的创建是在getBean(..)方法里</span><br><span class="line">         registerBeanPostProcessors(beanFactory);</span><br><span class="line"> </span><br><span class="line">         // Initialize message source for this context.</span><br><span class="line">         // 用于支持国际化，比如一些日志的国际化匹配等；</span><br><span class="line">         initMessageSource();</span><br><span class="line"> </span><br><span class="line">         // 为上下文初始化消息传播工具</span><br><span class="line">         initApplicationEventMulticaster();</span><br><span class="line"> </span><br><span class="line">         // Initialize other special beans in specific context subclasses.</span><br><span class="line">         // 钩子方法：额外的beans处理方法</span><br><span class="line">         onRefresh();</span><br><span class="line"> </span><br><span class="line">         // Check for listener beans and register them.</span><br><span class="line">         // 注册监听器</span><br><span class="line">         registerListeners();</span><br><span class="line"> </span><br><span class="line">         // Instantiate all remaining (non-lazy-init) singletons.</span><br><span class="line">         // 实例化非延时加载的bean单例</span><br><span class="line">         finishBeanFactoryInitialization(beanFactory);</span><br><span class="line"> </span><br><span class="line">         // Last step: publish corresponding event.</span><br><span class="line">         // push beans创建完成的消息</span><br><span class="line">         finishRefresh();</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      catch (BeansException ex) &#123;</span><br><span class="line">         if (logger.isWarnEnabled()) &#123;</span><br><span class="line">            logger.warn(&quot;Exception encountered during context initialization - &quot; +</span><br><span class="line">                  &quot;cancelling refresh attempt: &quot; + ex);</span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line">         // Destroy already created singletons to avoid dangling resources.</span><br><span class="line">         destroyBeans();</span><br><span class="line"> </span><br><span class="line">         // Reset &apos;active&apos; flag.</span><br><span class="line">         cancelRefresh(ex);</span><br><span class="line"> </span><br><span class="line">         // Propagate exception to caller.</span><br><span class="line">         throw ex;</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      finally &#123;</span><br><span class="line">         // Reset common introspection caches in Spring&apos;s core, since we</span><br><span class="line">         // might not ever need metadata for singleton beans anymore...</span><br><span class="line">         resetCommonCaches();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="spring-类加载的基本类spring-DefaultListableBeanFactory-UML示意图："><a href="#spring-类加载的基本类spring-DefaultListableBeanFactory-UML示意图：" class="headerlink" title="spring 类加载的基本类spring DefaultListableBeanFactory UML示意图："></a>spring 类加载的基本类spring DefaultListableBeanFactory UML示意图：</h2><p><img src="https://upload-images.jianshu.io/upload_images/8595440-40411e98d35d56af.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h2 id="spring-bean-创建过程"><a href="#spring-bean-创建过程" class="headerlink" title="spring bean 创建过程"></a>spring bean 创建过程</h2><ul>
+<li>转换beanName</li>
+<li>尝试从缓存中获取单例</li>
+<li>bean本身的实例化</li>
+<li>原型模式依赖检测</li>
+<li>parentBeanFactory 检测</li>
+<li>将gernerecBeanDefinition 转换成 RootBeanDefination</li>
+<li>寻找依赖</li>
+<li>根据scope 初始化(init)对应的bean</li>
+<li>类型转换</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Return an instance, which may be shared or independent, of the specified bean.</span><br><span class="line"> * @param name the name of the bean to retrieve</span><br><span class="line"> * @param requiredType the required type of the bean to retrieve</span><br><span class="line"> * @param args arguments to use when creating a bean instance using explicit arguments</span><br><span class="line"> * (only applied when creating a new instance as opposed to retrieving an existing one)</span><br><span class="line"> * @param typeCheckOnly whether the instance is obtained for a type check,</span><br><span class="line"> * not for actual use</span><br><span class="line"> * @return an instance of the bean</span><br><span class="line"> * @throws BeansException if the bean could not be created</span><br><span class="line"> */</span><br><span class="line">@SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">protected &lt;T&gt; T doGetBean(</span><br><span class="line">      final String name, final Class&lt;T&gt; requiredType, final Object[] args, boolean typeCheckOnly)</span><br><span class="line">      throws BeansException &#123;</span><br><span class="line"> </span><br><span class="line">   //转换beanName，我们知道在spring中，bean factory的名称都是类似于 &amp;org.springframework.boot.autoconfigure.internalCachingMetadataReaderFactory</span><br><span class="line">   //因此获取的时候需要进行转换</span><br><span class="line">   final String beanName = transformedBeanName(name);</span><br><span class="line">   Object bean;</span><br><span class="line"> </span><br><span class="line">   // Eagerly check singleton cache for manually registered singletons.</span><br><span class="line">   // 尝试从缓存中获取单例</span><br><span class="line">   Object sharedInstance = getSingleton(beanName);</span><br><span class="line">   if (sharedInstance != null &amp;&amp; args == null) &#123;</span><br><span class="line">      if (logger.isDebugEnabled()) &#123;</span><br><span class="line">         if (isSingletonCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">            logger.debug(&quot;Returning eagerly cached instance of singleton bean &apos;&quot; + beanName +</span><br><span class="line">                  &quot;&apos; that is not fully initialized yet - a consequence of a circular reference&quot;);</span><br><span class="line">         &#125;</span><br><span class="line">         else &#123;</span><br><span class="line">            logger.debug(&quot;Returning cached instance of singleton bean &apos;&quot; + beanName + &quot;&apos;&quot;);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      //实例化</span><br><span class="line">      bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   else &#123;</span><br><span class="line">      // Fail if we&apos;re already creating this bean instance:</span><br><span class="line">      // We&apos;re assumably within a circular reference.</span><br><span class="line">      // 检测当前依赖的类是否正在创建，如果是，则抛出异常</span><br><span class="line">      if (isPrototypeCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">         throw new BeanCurrentlyInCreationException(beanName);</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      // Check if bean definition exists in this factory.</span><br><span class="line">      // 如果bean配置不存在则只能去父工厂找</span><br><span class="line">      BeanFactory parentBeanFactory = getParentBeanFactory();</span><br><span class="line">      if (parentBeanFactory != null &amp;&amp; !containsBeanDefinition(beanName)) &#123;</span><br><span class="line">         // Not found -&gt; check parent.</span><br><span class="line">         String nameToLookup = originalBeanName(name);</span><br><span class="line">         if (args != null) &#123;</span><br><span class="line">            // Delegation to parent with explicit args.</span><br><span class="line">            return (T) parentBeanFactory.getBean(nameToLookup, args);</span><br><span class="line">         &#125;</span><br><span class="line">         else &#123;</span><br><span class="line">            // No args -&gt; delegate to standard getBean method.</span><br><span class="line">            return parentBeanFactory.getBean(nameToLookup, requiredType);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      if (!typeCheckOnly) &#123;</span><br><span class="line">     </span><br><span class="line">         markBeanAsCreated(beanName);</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      try &#123;</span><br><span class="line">         //转换并合并BeanDefinition属性</span><br><span class="line">         final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);</span><br><span class="line">         checkMergedBeanDefinition(mbd, beanName, args);</span><br><span class="line"> </span><br><span class="line">         // Guarantee initialization of beans that the current bean depends on.</span><br><span class="line">         // 原型模式的bean需要循环检测依赖  防止出现A-&gt;B-&gt;A 的循环依赖情况出现</span><br><span class="line">         String[] dependsOn = mbd.getDependsOn();</span><br><span class="line">         if (dependsOn != null) &#123;</span><br><span class="line">            for (String dep : dependsOn) &#123;</span><br><span class="line">               if (isDependent(beanName, dep)) &#123;</span><br><span class="line">                  throw new BeanCreationException(mbd.getResourceDescription(), beanName,</span><br><span class="line">                        &quot;Circular depends-on relationship between &apos;&quot; + beanName + &quot;&apos; and &apos;&quot; + dep + &quot;&apos;&quot;);</span><br><span class="line">               &#125;</span><br><span class="line">               registerDependentBean(dep, beanName);</span><br><span class="line">               getBean(dep);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line">         // Create bean instance.</span><br><span class="line">         // 创建bean实例</span><br><span class="line">         if (mbd.isSingleton()) &#123;</span><br><span class="line">            sharedInstance = getSingleton(beanName, new ObjectFactory&lt;Object&gt;() &#123;</span><br><span class="line">               @Override</span><br><span class="line">               public Object getObject() throws BeansException &#123;</span><br><span class="line">                  try &#123;</span><br><span class="line">                     return createBean(beanName, mbd, args);</span><br><span class="line">                  &#125;</span><br><span class="line">                  catch (BeansException ex) &#123;</span><br><span class="line">                     // Explicitly remove instance from singleton cache: It might have been put there</span><br><span class="line">                     // eagerly by the creation process, to allow for circular reference resolution.</span><br><span class="line">                     // Also remove any beans that received a temporary reference to the bean.</span><br><span class="line">                     destroySingleton(beanName);</span><br><span class="line">                     throw ex;</span><br><span class="line">                  &#125;</span><br><span class="line">               &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);</span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line">         else if (mbd.isPrototype()) &#123;</span><br><span class="line">            // It&apos;s a prototype -&gt; create a new instance.</span><br><span class="line">            Object prototypeInstance = null;</span><br><span class="line">            try &#123;</span><br><span class="line">               beforePrototypeCreation(beanName);</span><br><span class="line">               prototypeInstance = createBean(beanName, mbd, args);</span><br><span class="line">            &#125;</span><br><span class="line">            finally &#123;</span><br><span class="line">               afterPrototypeCreation(beanName);</span><br><span class="line">            &#125;</span><br><span class="line">            bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);</span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line">         else &#123;</span><br><span class="line">            String scopeName = mbd.getScope();</span><br><span class="line">            final Scope scope = this.scopes.get(scopeName);</span><br><span class="line">            if (scope == null) &#123;</span><br><span class="line">               throw new IllegalStateException(&quot;No Scope registered for scope name &apos;&quot; + scopeName + &quot;&apos;&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">            try &#123;</span><br><span class="line">               Object scopedInstance = scope.get(beanName, new ObjectFactory&lt;Object&gt;() &#123;</span><br><span class="line">                  @Override</span><br><span class="line">                  public Object getObject() throws BeansException &#123;</span><br><span class="line">                     beforePrototypeCreation(beanName);</span><br><span class="line">                     try &#123;</span><br><span class="line">                        return createBean(beanName, mbd, args);</span><br><span class="line">                     &#125;</span><br><span class="line">                     finally &#123;</span><br><span class="line">                        afterPrototypeCreation(beanName);</span><br><span class="line">                     &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">               &#125;);</span><br><span class="line">               bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);</span><br><span class="line">            &#125;</span><br><span class="line">            catch (IllegalStateException ex) &#123;</span><br><span class="line">               throw new BeanCreationException(beanName,</span><br><span class="line">                     &quot;Scope &apos;&quot; + scopeName + &quot;&apos; is not active for the current thread; consider &quot; +</span><br><span class="line">                     &quot;defining a scoped proxy for this bean if you intend to refer to it from a singleton&quot;,</span><br><span class="line">                     ex);</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      catch (BeansException ex) &#123;</span><br><span class="line">         cleanupAfterBeanCreationFailure(beanName);</span><br><span class="line">         throw ex;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   // Check if required type matches the type of the actual bean instance.</span><br><span class="line">   // 转换bean类型</span><br><span class="line">   if (requiredType != null &amp;&amp; bean != null &amp;&amp; !requiredType.isAssignableFrom(bean.getClass())) &#123;</span><br><span class="line">      try &#123;</span><br><span class="line">         return getTypeConverter().convertIfNecessary(bean, requiredType);</span><br><span class="line">      &#125;</span><br><span class="line">      catch (TypeMismatchException ex) &#123;</span><br><span class="line">         if (logger.isDebugEnabled()) &#123;</span><br><span class="line">            logger.debug(&quot;Failed to convert bean &apos;&quot; + name + &quot;&apos; to required type &apos;&quot; +</span><br><span class="line">                  ClassUtils.getQualifiedName(requiredType) + &quot;&apos;&quot;, ex);</span><br><span class="line">         &#125;</span><br><span class="line">         throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   return (T) bean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="spring事务隔离级别及事务传播实现"><a href="#spring事务隔离级别及事务传播实现" class="headerlink" title="spring事务隔离级别及事务传播实现"></a>spring事务隔离级别及事务传播实现</h2><ul>
+<li>propagation_requierd(spring的事务默认是该级别)：如果当前没有事务，就新建一个事务，如果已存在一个事务中，加入到这个事务中，这是最常见的选择。</li>
+<li>propagation_supports：支持当前事务，如果没有当前事务，就以非事务方法执行。</li>
+<li>propagation_mandatory：使用当前事务，如果没有当前事务，就抛出异常。</li>
+<li>propagation_required_new：新建事务，如果当前存在事务，把当前事务挂起。</li>
+<li>propagation_not_supported：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。</li>
+<li>propagation_never：以非事务方式执行操作，如果当前事务存在则抛出异常。</li>
+<li>propagation_nested：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与propagation_required类似的操作</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"> * Create a TransactionStatus for an existing transaction.</span><br><span class="line"> */</span><br><span class="line">private TransactionStatus handleExistingTransaction(</span><br><span class="line">      TransactionDefinition definition, Object transaction, boolean debugEnabled)</span><br><span class="line">      throws TransactionException &#123;</span><br><span class="line"> </span><br><span class="line">    //若为非事务方式，则抛异常</span><br><span class="line">   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) &#123;</span><br><span class="line">      throw new IllegalTransactionStateException(</span><br><span class="line">            &quot;Existing transaction found for transaction marked with propagation &apos;never&apos;&quot;);</span><br><span class="line">   &#125;</span><br><span class="line">    </span><br><span class="line">   // 若存在事务，挂起适当前事务</span><br><span class="line">   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) &#123;</span><br><span class="line">      if (debugEnabled) &#123;</span><br><span class="line">         logger.debug(&quot;Suspending current transaction&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      // 挂起当前事务</span><br><span class="line">      Object suspendedResources = suspend(transaction);</span><br><span class="line">      boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);</span><br><span class="line">      return prepareTransactionStatus(</span><br><span class="line">            definition, null, false, newSynchronization, debugEnabled, suspendedResources);</span><br><span class="line">   &#125;</span><br><span class="line">    </span><br><span class="line">   // 挂起当前事务，并新建事务</span><br><span class="line">   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) &#123;</span><br><span class="line">      if (debugEnabled) &#123;</span><br><span class="line">         logger.debug(&quot;Suspending current transaction, creating new transaction with name [&quot; +</span><br><span class="line">               definition.getName() + &quot;]&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      //挂起当前事务</span><br><span class="line">      SuspendedResourcesHolder suspendedResources = suspend(transaction);</span><br><span class="line">      try &#123;</span><br><span class="line">         boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);</span><br><span class="line">         DefaultTransactionStatus status = newTransactionStatus(</span><br><span class="line">               definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);</span><br><span class="line">         // 重新开启事务</span><br><span class="line">         doBegin(transaction, definition);</span><br><span class="line">         prepareSynchronization(status, definition);</span><br><span class="line">         return status;</span><br><span class="line">      &#125;</span><br><span class="line">      catch (RuntimeException beginEx) &#123;</span><br><span class="line">         resumeAfterBeginException(transaction, suspendedResources, beginEx);</span><br><span class="line">         throw beginEx;</span><br><span class="line">      &#125;</span><br><span class="line">      catch (Error beginErr) &#123;</span><br><span class="line">         resumeAfterBeginException(transaction, suspendedResources, beginErr);</span><br><span class="line">         throw beginErr;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">     </span><br><span class="line">   // 若当前事务存在，则嵌套执行事务</span><br><span class="line">   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) &#123;</span><br><span class="line">      if (!isNestedTransactionAllowed()) &#123;</span><br><span class="line">         throw new NestedTransactionNotSupportedException(</span><br><span class="line">               &quot;Transaction manager does not allow nested transactions by default - &quot; +</span><br><span class="line">               &quot;specify &apos;nestedTransactionAllowed&apos; property with value &apos;true&apos;&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      if (debugEnabled) &#123;</span><br><span class="line">         logger.debug(&quot;Creating nested transaction with name [&quot; + definition.getName() + &quot;]&quot;);</span><br><span class="line">      &#125;</span><br><span class="line">      // 判定是否支持事务备份点</span><br><span class="line">      if (useSavepointForNestedTransaction()) &#123;</span><br><span class="line">         // Create savepoint within existing Spring-managed transaction,</span><br><span class="line">         // through the SavepointManager API implemented by TransactionStatus.</span><br><span class="line">         // Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.</span><br><span class="line">         DefaultTransactionStatus status =</span><br><span class="line">               prepareTransactionStatus(definition, transaction, false, false, debugEnabled, null);</span><br><span class="line">         // 创建备份点</span><br><span class="line">         status.createAndHoldSavepoint();</span><br><span class="line">         return status;</span><br><span class="line">      &#125;</span><br><span class="line">      else &#123;</span><br><span class="line">         // Nested transaction through nested begin and commit/rollback calls.</span><br><span class="line">         // Usually only for JTA: Spring synchronization might get activated here</span><br><span class="line">         // in case of a pre-existing JTA transaction.</span><br><span class="line">         boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);</span><br><span class="line">         DefaultTransactionStatus status = newTransactionStatus(</span><br><span class="line">               definition, transaction, true, newSynchronization, debugEnabled, null);</span><br><span class="line">         // 不支持备份点的情况下会新建事务</span><br><span class="line">         doBegin(transaction, definition);</span><br><span class="line">         prepareSynchronization(status, definition);</span><br><span class="line">         return status;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   // Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.</span><br><span class="line">   if (debugEnabled) &#123;</span><br><span class="line">      logger.debug(&quot;Participating in existing transaction&quot;);</span><br><span class="line">   &#125;</span><br><span class="line">   if (isValidateExistingTransaction()) &#123;</span><br><span class="line">      if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) &#123;</span><br><span class="line">         Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();</span><br><span class="line">         if (currentIsolationLevel == null || currentIsolationLevel != definition.getIsolationLevel()) &#123;</span><br><span class="line">            Constants isoConstants = DefaultTransactionDefinition.constants;</span><br><span class="line">            throw new IllegalTransactionStateException(&quot;Participating transaction with definition [&quot; +</span><br><span class="line">                  definition + &quot;] specifies isolation level which is incompatible with existing transaction: &quot; +</span><br><span class="line">                  (currentIsolationLevel != null ?</span><br><span class="line">                        isoConstants.toCode(currentIsolationLevel, DefaultTransactionDefinition.PREFIX_ISOLATION) :</span><br><span class="line">                        &quot;(unknown)&quot;));</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      if (!definition.isReadOnly()) &#123;</span><br><span class="line">         if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) &#123;</span><br><span class="line">            throw new IllegalTransactionStateException(&quot;Participating transaction with definition [&quot; +</span><br><span class="line">                  definition + &quot;] is not marked as read-only but existing transaction is&quot;);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);</span><br><span class="line">   return prepareTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="一些干货"><a href="#一些干货" class="headerlink" title="一些干货"></a>一些干货</h1><h2 id="aop注入的实现过程"><a href="#aop注入的实现过程" class="headerlink" title="aop注入的实现过程"></a>aop注入的实现过程</h2><p>doCreateBean中会暴露一个bean引用，用以处理循环引用；同时大家熟知的AOP就是通过getEarlyBeanReference(..)方法植入的；具体的，是在wrapIfNecessary(..) 方法中封装了advice并创建了代理；</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/8595440-81ae3f036ad5c4e4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br><img src="https://upload-images.jianshu.io/upload_images/8595440-a40ed52d20a40d46.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h2 id="Autowired注解的实现"><a href="#Autowired注解的实现" class="headerlink" title="@Autowired注解的实现"></a>@Autowired注解的实现</h2><p><img src="https://upload-images.jianshu.io/upload_images/8595440-9f2f892bbce371d9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>doCreateBean(..)中的populateBean(..)方法，实现了基于@Autowired注解的实现，根据名称或类型进行依赖的注入；</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+	<div>
+		
+		<div>
+
+    <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+
+</div>
+
+		
+	</div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag">Spring</a>
+          
+            <a href="/tags/源码阅读/" rel="tag">源码阅读</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/19/Spring-Mvc源码阅读/" rel="next" title="Spring Mvc源码阅读">
+                <i class="fa fa-chevron-left"></i> Spring Mvc源码阅读
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+
+
+<script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+<script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+<div class="widget-wrap">
+<h3 class="widget-title">Tag Cloud</h3>
+<div id="myCanvasContainer" class="widget tagcloud">
+    <canvas width="250" height="250" id="resCanvas" style="width=100%">
+        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-MVC/">Spring MVC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/源码阅读/">源码阅读</a><span class="tag-list-count">2</span></li></ul>
+    </canvas>
+</div>
+</div>
+
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">xytyzgf</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+    
+ 
+ 
+ 
+ 
+
+
+          
+            
+          
+          <div id="days"></div>
+</script>
+<script language="javascript">
+function show_date_time(){
+window.setTimeout("show_date_time()", 1000);
+BirthDay=new Date("05/27/2017 15:00:00");
+today=new Date();
+timeold=(today.getTime()-BirthDay.getTime());
+sectimeold=timeold/1000
+secondsold=Math.floor(sectimeold);
+msPerDay=24*60*60*1000
+e_daysold=timeold/msPerDay
+daysold=Math.floor(e_daysold);
+e_hrsold=(e_daysold-daysold)*24;
+hrsold=setzero(Math.floor(e_hrsold));
+e_minsold=(e_hrsold-hrsold)*60;
+minsold=setzero(Math.floor((e_hrsold-hrsold)*60));
+seconds=setzero(Math.floor((e_minsold-minsold)*60));
+document.getElementById('days').innerHTML="已运行"+daysold+"天"+hrsold+"时"+minsold+"分"+seconds+"秒";
+}
+function setzero(i){
+if (i<10)
+{i="0" + i};
+return i;
+}
+show_date_time();
+</script>
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#spring-核心代码"><span class="nav-number">1.</span> <span class="nav-text">spring 核心代码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#核心流程初始化过程"><span class="nav-number">1.1.</span> <span class="nav-text">核心流程初始化过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spring-类加载的基本类spring-DefaultListableBeanFactory-UML示意图："><span class="nav-number">1.2.</span> <span class="nav-text">spring 类加载的基本类spring DefaultListableBeanFactory UML示意图：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spring-bean-创建过程"><span class="nav-number">1.3.</span> <span class="nav-text">spring bean 创建过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spring事务隔离级别及事务传播实现"><span class="nav-number">1.4.</span> <span class="nav-text">spring事务隔离级别及事务传播实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一些干货"><span class="nav-number">2.</span> <span class="nav-text">一些干货</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#aop注入的实现过程"><span class="nav-number">2.1.</span> <span class="nav-text">aop注入的实现过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Autowired注解的实现"><span class="nav-number">2.2.</span> <span class="nav-text">@Autowired注解的实现</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xytyzgf</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'LrYdlcmjdK4euEfp2E3KgxAz-gzGzoHsz',
+        appKey: 'LrYdlcmjdK4euEfp2E3KgxAz-gzGzoHsz',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
