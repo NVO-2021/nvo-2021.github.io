@@ -540,7 +540,7 @@
           
             
           
-          <div id="days"></div>
+          <div id="days" style="text-align:center;font-size:14px;margin-top:10px;"></div>
 </script>
 <script language="javascript">
 function show_date_time(){
@@ -558,7 +558,7 @@ hrsold=setzero(Math.floor(e_hrsold));
 e_minsold=(e_hrsold-hrsold)*60;
 minsold=setzero(Math.floor((e_hrsold-hrsold)*60));
 seconds=setzero(Math.floor((e_minsold-minsold)*60));
-document.getElementById('days').innerHTML="<p>已运行"+daysold+"天"+hrsold+"时"+minsold+"分"+seconds+"秒</p>";
+document.getElementById('days').innerHTML="已运行"+daysold+"天"+hrsold+"时"+minsold+"分"+seconds+"秒";
 }
 function setzero(i){
 if (i<10)
