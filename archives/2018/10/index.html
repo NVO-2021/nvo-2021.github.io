@@ -626,7 +626,7 @@ hrsold=setzero(Math.floor(e_hrsold));
 e_minsold=(e_hrsold-hrsold)*60;
 minsold=setzero(Math.floor((e_hrsold-hrsold)*60));
 seconds=setzero(Math.floor((e_minsold-minsold)*60));
-document.getElementById('days').innerHTML="<span>已运行"+daysold+"天"+hrsold+"时"+minsold+"分"+seconds+"秒</span>";
+document.getElementById('days').innerHTML="<p>已运行"+daysold+"天"+hrsold+"时"+minsold+"分"+seconds+"秒</p>";
 }
 function setzero(i){
 if (i<10)
